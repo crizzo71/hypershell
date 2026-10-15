@@ -23,8 +23,7 @@ function plane<T>(data: T): Plane<T> {
   };
 }
 
-// Server-supplied delivery/Argo fields every PromotionEnvironment carries; these
-// tests only exercise selection, so they default to absent.
+// Server-supplied delivery/Argo fields every PromotionEnvironment carries.
 const envExtras = {
   activeDigest: null,
   proposedDigest: null,
@@ -45,14 +44,34 @@ const envExtras = {
 
 function renderApp(): void {
   const promotion: PromotionData = {
-    order: ["staging"],
+    order: ["int", "staging", "prod"],
     environments: {
+      int: {
+        name: "int",
+        activeRelease: "v2025",
+        proposedRelease: null,
+        gates: [],
+        ...envExtras,
+        envLabel: "int",
+        role: "hub",
+      },
       staging: {
         name: "staging",
         activeRelease: "v2025",
         proposedRelease: null,
         gates: [],
         ...envExtras,
+        envLabel: "staging",
+        role: "hub",
+      },
+      prod: {
+        name: "prod",
+        activeRelease: "v2025",
+        proposedRelease: null,
+        gates: [],
+        ...envExtras,
+        envLabel: "prod",
+        role: "hub",
       },
     },
     releases: ["v2025"],
@@ -82,6 +101,16 @@ function renderApp(): void {
 }
 
 describe("TopologyMap details drawer", () => {
+  it("left-aligns the first environment label and centers later labels", async () => {
+    renderApp();
+
+    const intLabel = await screen.findByText("INT");
+    expect(intLabel.getAttribute("text-anchor")).toBe("start");
+    expect(intLabel.getAttribute("x")).toBe("210");
+    expect(screen.getByText("STAGING").getAttribute("x")).toBe("625");
+    expect(screen.getByText("PROD").getAttribute("x")).toBe("965");
+  });
+
   it("closes on Escape when open, and leaves Escape inert when closed", async () => {
     renderApp();
 

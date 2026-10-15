@@ -338,21 +338,23 @@ export function TopologyMap({
                     </g>
                   ))}
 
-                  {/* env-type band headers: group the columns sharing an env-type (int /
-              stage / prod) into one label spanning them (server data) */}
-                  {layout.bands.map((band) => (
-                    <text
-                      key={`${band.label}@${f(band.x)}`}
-                      x={band.centerX}
-                      y={headerY}
-                      textAnchor="middle"
-                      fontSize={13}
-                      fontWeight={700}
-                      fill={TEXT_COLOR}
-                    >
-                      {band.label.toUpperCase()}
-                    </text>
-                  ))}
+                  {/* Left-align the first environment label; center later labels over their groups. */}
+                  {layout.bands.map((band, index) => {
+                    const firstBand = index === 0;
+                    return (
+                      <text
+                        key={`${band.label}@${f(band.x)}`}
+                        x={firstBand ? band.x : band.centerX}
+                        y={headerY}
+                        textAnchor={firstBand ? "start" : "middle"}
+                        fontSize={13}
+                        fontWeight={700}
+                        fill={TEXT_COLOR}
+                      >
+                        {band.label.toUpperCase()}
+                      </text>
+                    );
+                  })}
 
                   {/* rails from the change diamond into the first column's nodes */}
                   {changeEdges.map((e) => (
