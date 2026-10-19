@@ -70,3 +70,5 @@ loop.txt
 /e2e-console-artifacts
 .hypershell/reports/*.md
 .hypershell/reports/*.json
+.hypershell/reports/*.md
+.hypershell/reports/*.json

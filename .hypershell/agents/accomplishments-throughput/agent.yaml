@@ -10,7 +10,7 @@ metadata:
 spec:
   sandbox_template_id: agent-runtime-slim
   gateway_id: agents-gateway
-  repository_id: openshift-online/hypershell
+  repository_id: crizzo71/hypershell
 
   # Weekly Tuesday 6pm EST = 23:00 UTC (EDT: 22:00, EST: 23:00)
   # Using 23:00 UTC to cover both EDT and EST
@@ -26,7 +26,7 @@ spec:
 
   parameters: |
     {
-      "REPOSITORY": "openshift-online/hypershell",
+      "REPOSITORY": "crizzo71/hypershell",
       "DRY_RUN": "false",
       "REPORT_OUTPUT_DIR": ".hypershell/reports"
     }
