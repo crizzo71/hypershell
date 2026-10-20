@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: hypershell-agents
+
+# accomplishments-throughput agent: weekly aggregated accomplishments + throughput report
+# Inherits base agent patterns from ../../base
+
+resources:
+  - agent.yaml
+
+# Optional patches for customization (e.g., model override, sandbox template, etc.)
+# Example: change model from sonnet-4-5 to opus-5-5
+# patches:
+#   - target:
+#       kind: AgentRuntime
+#       name: accomplishments-throughput
+#     patch: |-
+#       - op: replace
+#         path: /spec/model
+#         value: claude-opus-5-5

@@ -1,0 +1,99 @@
+# accomplishments-throughput agent configuration
+# Weekly aggregated accomplishments and throughput metrics report
+# Runs every Tuesday at 6:00 PM EST
+
+apiVersion: hypershell.redhat.io/v1
+kind: AgentRuntime
+metadata:
+  name: accomplishments-throughput
+  description: Weekly accomplishments and throughput metrics report (all scopes aggregated)
+spec:
+  sandbox_template_id: agent-runtime-slim
+  gateway_id: agents-gateway
+  repository_id: openshift-online/hypershell
+
+  # Weekly Tuesday 6pm EST = 23:00 UTC (EDT: 22:00, EST: 23:00)
+  # Using 23:00 UTC to cover both EDT and EST
+  # Cron: minute hour day_of_month month day_of_week
+  # 0 23 * * 2 = every Tuesday at 23:00 UTC
+  cron: "0 23 * * 2"
+
+  concurrency_policy: Forbid
+  login_refresh_seconds: 1800
+
+  # No selector: weekly report, not issue-driven
+  selector: []
+
+  parameters: |
+    {
+      "REPOSITORY": "openshift-online/hypershell",
+      "DRY_RUN": "false",
+      "REPORT_OUTPUT_DIR": ".hypershell/reports"
+    }
+
+---
+apiVersion: hypershell.redhat.io/v1
+kind: SecretSource
+metadata:
+  name: accomplishments-throughput-gateway-identity
+spec:
+  agent_runtime_id: accomplishments-throughput
+  purpose: gateway-identity
+  backend: kubernetes
+  path: hypershell/accomplishments-throughput/gateway-identity
+
+---
+apiVersion: hypershell.redhat.io/v1
+kind: SecretSource
+metadata:
+  name: accomplishments-throughput-inference-key
+spec:
+  agent_runtime_id: accomplishments-throughput
+  purpose: api-key
+  backend: vault
+  path: hypershell/accomplishments-throughput/anthropic-api-key
+
+---
+apiVersion: hypershell.redhat.io/v1
+kind: SecretSource
+metadata:
+  name: accomplishments-throughput-github-key
+spec:
+  agent_runtime_id: accomplishments-throughput
+  purpose: app-private-key
+  backend: vault
+  path: hypershell/accomplishments-throughput/github-app
+
+---
+apiVersion: hypershell.redhat.io/v1
+kind: ProviderBinding
+metadata:
+  name: accomplishments-throughput-inference
+spec:
+  workspace_id: accomplishments-throughput
+  provider_spec_id: claude-inference
+  secret_source_id: accomplishments-throughput-inference-key
+  refresh_strategy: |
+    {"type": "static-token", "secret_material": [{"key": "api_key", "secret_source_id": "accomplishments-throughput-inference-key"}]}
+
+---
+apiVersion: hypershell.redhat.io/v1
+kind: ProviderBinding
+metadata:
+  name: accomplishments-throughput-github
+spec:
+  workspace_id: accomplishments-throughput
+  provider_spec_id: github-source-control
+  secret_source_id: accomplishments-throughput-github-key
+  refresh_strategy: |
+    {"type": "app-installation-token", "material": {"app_id": "REPLACE_WITH_GITHUB_APP_ID"}, "secret_material": [{"key": "private_key", "secret_source_id": "accomplishments-throughput-github-key"}]}
+
+---
+apiVersion: hypershell.redhat.io/v1
+kind: InferenceRoute
+metadata:
+  name: accomplishments-throughput-inference-route
+spec:
+  workspace_id: accomplishments-throughput
+  provider_binding_id: accomplishments-throughput-inference
+  model: claude-sonnet-4-5
